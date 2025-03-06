@@ -8,24 +8,24 @@ import (
 	"time"
 )
 
-type Try struct {
+type Attempt struct {
 	boxes []int
 	win   bool
 }
 
 type Game struct {
-	boxes        []int
-	studentTries []Try
-	strategy     func(g *Game) bool
-	random       *rand.Rand
+	boxes            []int
+	studentsAttempts []Attempt
+	strategy         func(g *Game) bool
+	random           *rand.Rand
 }
 
 func NewGame(random *rand.Rand, Strategy func(g *Game) bool) *Game {
 	g := Game{
-		boxes:        randSlice(50, random),
-		studentTries: make([]Try, 50),
-		random:       random,
-		strategy:     Strategy,
+		boxes:            randSlice(50, random),
+		studentsAttempts: make([]Attempt, 50),
+		random:           random,
+		strategy:         Strategy,
 	}
 
 	return &g
@@ -38,13 +38,13 @@ func (g *Game) Process() bool {
 func NoContract(g *Game) (win bool) {
 	var winsCount int
 
-	for studentIndex := range g.studentTries {
+	for studentIndex := range g.studentsAttempts {
 		for _, openingBoxIndex := range randSlice(25, g.random) {
-			g.studentTries[studentIndex].boxes = append(g.studentTries[studentIndex].boxes, openingBoxIndex)
+			g.studentsAttempts[studentIndex].boxes = append(g.studentsAttempts[studentIndex].boxes, openingBoxIndex)
 
 			if g.boxes[openingBoxIndex] == studentIndex {
 				winsCount += 1
-				g.studentTries[studentIndex].win = true
+				g.studentsAttempts[studentIndex].win = true
 				break
 			}
 		}
@@ -56,14 +56,14 @@ func NoContract(g *Game) (win bool) {
 func WithContract(g *Game) (win bool) {
 	var winsCount int
 
-	for studentIndex := range g.studentTries {
+	for studentIndex := range g.studentsAttempts {
 		openingBoxIndex := studentIndex
 		for range 25 {
-			g.studentTries[studentIndex].boxes = append(g.studentTries[studentIndex].boxes, openingBoxIndex)
+			g.studentsAttempts[studentIndex].boxes = append(g.studentsAttempts[studentIndex].boxes, openingBoxIndex)
 
 			if g.boxes[openingBoxIndex] == studentIndex {
 				winsCount += 1
-				g.studentTries[studentIndex].win = true
+				g.studentsAttempts[studentIndex].win = true
 				break
 			}
 
