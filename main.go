@@ -22,19 +22,11 @@ type Game struct {
 
 func NewGame(random *rand.Rand, Strategy func(g *Game) bool) *Game {
 	g := Game{
-		boxes:        make([]int, 50),
+		boxes:        randSlice(50, random),
 		studentTries: make([]Try, 50),
 		random:       random,
 		strategy:     Strategy,
 	}
-
-	for i := range 50 {
-		g.boxes[i] = i
-	}
-
-	random.Shuffle(len(g.boxes), func(i, j int) {
-		g.boxes[i], g.boxes[j] = g.boxes[j], g.boxes[i]
-	})
 
 	return &g
 }
@@ -47,8 +39,7 @@ func NoContract(g *Game) (win bool) {
 	var winsCount int
 
 	for studentIndex := range g.studentTries {
-		for range 25 {
-			openingBoxIndex := g.random.IntN(50)
+		for _, openingBoxIndex := range randSlice(50, g.random) {
 			g.studentTries[studentIndex].boxes = append(g.studentTries[studentIndex].boxes, openingBoxIndex)
 
 			if g.boxes[openingBoxIndex] == studentIndex {
@@ -100,7 +91,7 @@ func main() {
 			defer wg.Done()
 			defer func() { <-sem }()
 
-			src := rand.NewPCG(uint64(i*13), uint64(i*12))
+			src := rand.NewPCG(uint64(i+1), uint64(i))
 			random := rand.New(src)
 
 			game := NewGame(random, NoContract)
@@ -124,4 +115,19 @@ func main() {
 	fmt.Printf("probability of win with contract: %f\n", float64(withContractWins.Load())/float64(gamesCount))
 
 	fmt.Printf("takes time: %v\n", time.Since(t))
+}
+
+// randSlice returns shuffled slice with numbers in range [0, length)
+func randSlice(length int, random *rand.Rand) []int {
+	slice := make([]int, length)
+
+	for i := range 50 {
+		slice[i] = i
+	}
+
+	random.Shuffle(length, func(i, j int) {
+		slice[i], slice[j] = slice[j], slice[i]
+	})
+
+	return slice
 }
