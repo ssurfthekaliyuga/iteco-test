@@ -39,7 +39,7 @@ func NoContract(g *Game) (win bool) {
 	var winsCount int
 
 	for studentIndex := range g.studentTries {
-		for _, openingBoxIndex := range randSlice(50, g.random) {
+		for _, openingBoxIndex := range randSlice(25, g.random) {
 			g.studentTries[studentIndex].boxes = append(g.studentTries[studentIndex].boxes, openingBoxIndex)
 
 			if g.boxes[openingBoxIndex] == studentIndex {
@@ -121,7 +121,7 @@ func main() {
 func randSlice(length int, random *rand.Rand) []int {
 	slice := make([]int, length)
 
-	for i := range 50 {
+	for i := range length {
 		slice[i] = i
 	}
 
