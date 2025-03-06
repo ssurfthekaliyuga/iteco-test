@@ -9,8 +9,8 @@ import (
 )
 
 type Attempt struct {
-	boxes []int
-	win   bool
+	openedBoxes []int
+	success     bool
 }
 
 type Game struct {
@@ -31,7 +31,7 @@ func NewGame(random *rand.Rand, Strategy func(g *Game) bool) *Game {
 	return &g
 }
 
-func (g *Game) Process() bool {
+func (g *Game) Start() bool {
 	return g.strategy(g)
 }
 
@@ -40,11 +40,14 @@ func NoContract(g *Game) (win bool) {
 
 	for studentIndex := range g.studentsAttempts {
 		for _, openingBoxIndex := range randSlice(25, g.random) {
-			g.studentsAttempts[studentIndex].boxes = append(g.studentsAttempts[studentIndex].boxes, openingBoxIndex)
+			g.studentsAttempts[studentIndex].openedBoxes = append(
+				g.studentsAttempts[studentIndex].openedBoxes,
+				openingBoxIndex,
+			)
 
 			if g.boxes[openingBoxIndex] == studentIndex {
 				winsCount += 1
-				g.studentsAttempts[studentIndex].win = true
+				g.studentsAttempts[studentIndex].success = true
 				break
 			}
 		}
@@ -59,11 +62,14 @@ func WithContract(g *Game) (win bool) {
 	for studentIndex := range g.studentsAttempts {
 		openingBoxIndex := studentIndex
 		for range 25 {
-			g.studentsAttempts[studentIndex].boxes = append(g.studentsAttempts[studentIndex].boxes, openingBoxIndex)
+			g.studentsAttempts[studentIndex].openedBoxes = append(
+				g.studentsAttempts[studentIndex].openedBoxes,
+				openingBoxIndex,
+			)
 
 			if g.boxes[openingBoxIndex] == studentIndex {
 				winsCount += 1
-				g.studentsAttempts[studentIndex].win = true
+				g.studentsAttempts[studentIndex].success = true
 				break
 			}
 
@@ -95,12 +101,12 @@ func main() {
 			random := rand.New(src)
 
 			game := NewGame(random, NoContract)
-			if game.Process() {
+			if game.Start() {
 				noContractWins.Add(1)
 			}
 
 			game = NewGame(random, WithContract)
-			if game.Process() {
+			if game.Start() {
 				withContractWins.Add(1)
 			}
 		}()
